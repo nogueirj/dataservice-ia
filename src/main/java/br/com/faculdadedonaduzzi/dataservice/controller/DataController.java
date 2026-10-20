@@ -1,4 +1,4 @@
-package br.com.faculdadedonaduzzi.dataservice;
+package br.com.faculdadedonaduzzi.dataservice.controller;
 
 import br.com.faculdadedonaduzzi.dataservice.dto.MathResponse;
 import br.com.faculdadedonaduzzi.dataservice.dto.SpamCheckRequest;
@@ -9,6 +9,8 @@ import br.com.faculdadedonaduzzi.dataservice.service.SpamDetectorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -55,10 +57,15 @@ public class DataController {
     @ApiResponse(responseCode = "200", description = "Requisição processada com sucesso, retornando a classificação de spam.")
     @ApiResponse(responseCode = "400", description = "Requisição inválida, por exemplo, se o conteúdo da mensagem estiver ausente.")
     @ApiResponse(responseCode = "500", description = "Erro interno do servidor ao processar a requisição.")
+    @ApiResponse(responseCode = "206", description = "Requisições com provaveis spam reportados.")
     @ApiResponse(responseCode = "300", description = "Alteração de recurso")
     @PostMapping("/classify")
-    public SpamCheckResponse classify(@RequestBody SpamCheckRequest request){
-        return servicoDeSpam.spamCheck(request.messageContent());
+    public ResponseEntity<SpamCheckResponse> classify(@RequestBody SpamCheckRequest request){
+        SpamCheckResponse respostaDaApi = servicoDeSpam.spamCheck(request.messageContent());
+        if (respostaDaApi.isBlocked()){
+            return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).body(respostaDaApi);
+        }
+        return ResponseEntity.accepted().body(respostaDaApi);
     }
 
 }
