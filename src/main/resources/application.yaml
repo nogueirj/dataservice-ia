@@ -1,5 +1,23 @@
 spring:
   application:
     name: dataservice
-  server:
-    port: 8181
+
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+  datasource:
+    url: jdbc:h2:mem:fishdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  h2:
+    console:
+      enabled: true
+
+server:
+  port: 8080
